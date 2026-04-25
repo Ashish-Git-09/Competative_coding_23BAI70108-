@@ -1,5 +1,3 @@
-//Upvote and Comment
-
 class Solution {
 public:
     #define mod 1000000007  
