@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 1e5, B = 200;
+
+vector<int> p[N];
+
+int i, j, n, m, l, r, t, ans;
+int g[N], a[N];
+int f[500][N];
+
+int main() {
+    // Input n, m and array
+    for (scanf("%d%d", &n, &m); i < n; ++i) {
+        scanf("%d", a + i);
+        --a[i];
+        p[a[i]].push_back(i);
+    }
+
+    // Preprocessing (block DP)
+    for (i = 0; i * B < n; ++i) {
+        memset(g, 0, sizeof(g));
+        t = 0;
+
+        for (j = i * B; j < n; ++j) {
+            f[i][j] = t += (g[a[j]]++ < m);
+        }
+    }
+
+    // Queries
+    scanf("%d", &t);
+    while (t--) {
+        printf("%d\n", ans);
+
+        scanf("%d%d", &l, &r);
+
+        l = (l + ans) % n;
+        r = (r + ans) % n;
+
+        if (l > r) swap(l, r);
+
+        ans = 0;
+
+        if (l / B == r / B) {
+            // Same block → brute force
+            for (j = l; j <= r; ++j) {
+                ans += (g[a[j]]++ < m);
+            }
+            for (j = l; j <= r; ++j) {
+                g[a[j]] = 0;
+            }
+        } else {
+            // Different blocks
+            i = l / B + 1;
+            ans = f[i][r];
+
+            // Extend left part
+            for (j = i * B - 1; j >= l; --j) {
+                if (!g[a[j]]) {
+                    g[a[j]] =
+                        upper_bound(p[a[j]].begin(), p[a[j]].end(), r) -
+                        lower_bound(p[a[j]].begin(), p[a[j]].end(), i * B);
+                }
+                ans += (g[a[j]]++ < m);
+            }
+
+            // Clear
+            for (j = i * B - 1; j >= l; --j) {
+                g[a[j]] = 0;
+            }
+        }
+    }
+
+    return 0;
+}
